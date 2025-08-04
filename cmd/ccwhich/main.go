@@ -18,13 +18,20 @@ func main() {
 		findAll bool
 		silent  bool
 	)
-	flags := flag.NewFlagSet(fmt.Sprintf("%s @ %s", filepath.Base(os.Args[0]), Version), flag.ExitOnError)
-	flags.BoolVar(&findAll, "a", false, "List all instances of executables found (instead of just the first one of each).")
-	flags.BoolVar(&silent, "s", false, "No output, just return 0 if all of the executables are found, or 1 if some were not found.")
+	programName := fmt.Sprintf("%s @ %s", filepath.Base(os.Args[0]), Version)
+	flags := flag.NewFlagSet(programName, flag.ExitOnError)
+	flags.BoolVar(&findAll, "a", false,
+		"List all instances of executables found "+
+			"(instead of just the first one of each).")
+	flags.BoolVar(&silent, "s", false,
+		"No output, just return 0 if all of the executables "+
+			"are found, or 1 if some were not found.")
 	flags.Usage = func() {
-		_, _ = fmt.Fprintf(flags.Output(), "Usage of %s:\n", flags.Name())
-		_, _ = fmt.Fprintf(flags.Output(), "%s [-as] program ...\n", filepath.Base(os.Args[0]))
-		_, _ = fmt.Fprintln(flags.Output(), "See man page for the builtin which program.")
+		output := flags.Output()
+		_, _ = fmt.Fprintf(output, "Usage of %s:\n", flags.Name())
+		_, _ = fmt.Fprintf(output, "%s [-as] program ...\n", filepath.Base(os.Args[0]))
+		_, _ = fmt.Fprintf(output, "which – locate a program file in the user's path")
+		_, _ = fmt.Fprintln(output, "See `man which` for the builtin which program's usage.")
 		flags.PrintDefaults()
 	}
 	_ = flags.Parse(os.Args[1:])
