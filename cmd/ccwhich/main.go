@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 )
 
@@ -29,11 +28,15 @@ func main() {
 		flags.PrintDefaults()
 	}
 	_ = flags.Parse(os.Args[1:])
-	programs := flags.Args()
-	if len(programs) == 0 {
+	arguments := flags.Args()
+	if len(arguments) == 0 {
 		log.Fatal("At least one executable is required.")
 	}
 
+	programs := make(map[string]struct{}, len(arguments))
+	for _, arg := range arguments {
+		programs[arg] = struct{}{}
+	}
 	var exitCode int
 	for _, dir := range strings.Split(os.Getenv("PATH"), ":") {
 		listing, err := os.ReadDir(dir)
@@ -57,12 +60,13 @@ func main() {
 				continue // not executable
 			}
 			name := entry.Name()
-			if slices.Contains(programs, name) {
+			_, contains := programs[name]
+			if contains {
 				if !silent {
 					fmt.Println(fullPath)
 				}
 				if !findAll {
-					programs = slices.DeleteFunc(programs, func(s string) bool { return s == name })
+					delete(programs, name)
 					if len(programs) == 0 {
 						os.Exit(exitCode)
 					}
